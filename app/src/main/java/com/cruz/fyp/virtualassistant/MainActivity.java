@@ -1,45 +1,72 @@
 package com.cruz.fyp.virtualassistant;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cruz.fyp.virtualassistant.GUI.messageAdapter;
+import com.cruz.fyp.virtualassistant.GUI.RecyclerTouchListener;
+import com.cruz.fyp.virtualassistant.Azure.Speech;
+import com.cruz.fyp.virtualassistant.Azure.SpeechSynthesis.Synthesizer;
+import com.cruz.fyp.virtualassistant.Azure.SpeechSynthesis.Voice;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<Person> personList;
+    private Synthesizer synthesizer;
+    private List<Message> messageList;
     private RecyclerView recyclerView;
     private Button speechButton;
-    private MyAdapter adapter;
     private ProgressBar progressBar;
-    LinearLayoutManager layoutManager;
-
+    private String idNumber;
+    private QnABot qnABot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         recyclerView = findViewById(R.id.rv);
         speechButton = findViewById(R.id.SpeechButton);
+        progressBar = findViewById(R.id.progressBar);
+        qnABot = new QnABot();
+        synthesizer = new Synthesizer(getString(R.string.api_key));
+        synthesizer.SetServiceStrategy(Synthesizer.ServiceStrategy.AlwaysService);
+        Voice voice = new Voice("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)", Voice.Gender.Male, true);
+        synthesizer.SetVoice(voice, null);
 
         speechButton.setOnClickListener(startSpeech);
-        layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        personList = new ArrayList<>();
-        progressBar = findViewById(R.id.progressBar);
+        messageList = new ArrayList<>();
 
         initializeData();
         initializeAdapter();
@@ -47,60 +74,177 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Person movie = personList.get(position);
-                Toast.makeText(getApplicationContext(), movie.getName() + " is selected!", Toast.LENGTH_SHORT).show();
+                Message message = messageList.get(position);
+                Toast.makeText(getApplicationContext(), message.getMsg() + " is selected!", Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onLongClick(View view, int position) {
-                Person movie = personList.get(position);
-                personList.remove(position);
-                Toast.makeText(getApplicationContext(), movie.getName() + " is deleted!", Toast.LENGTH_SHORT).show();
+                Message message = messageList.get(position);
+                messageList.remove(position);
+                Toast.makeText(getApplicationContext(), message.getMsg() + " is deleted!", Toast.LENGTH_SHORT).show();
                 initializeAdapter();
             }
         }));
-
     }
 
-
-
     private void initializeData(){
-        personList.add(new Person("Hello", Person.PersonType.TWO_ITEM));
+        messageList.add(new Message("Hello", Message.MessageType.TWO_ITEM));
     }
 
     private void initializeAdapter(){
-        adapter = new MyAdapter(personList);
+        messageAdapter adapter = new messageAdapter(messageList);
         recyclerView.setAdapter(adapter);
     }
 
-    private View.OnClickListener startSpeech = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            personList.add(new Person("What's up", Person.PersonType.ONE_ITEM));
-            recyclerView.setAdapter(new MyAdapter(personList));
+    public void updateAdapter(){
+        recyclerView.setAdapter(new messageAdapter(messageList));
+        recyclerView.scrollToPosition(messageList.size() - 1);
+    }
 
+    public void newMessage(String message) {
+        messageList.add(new Message(message, Message.MessageType.TWO_ITEM));
+        updateAdapter();
+    }
+
+    private void resetButtons(boolean show){
+        if(show){
+            speechButton.setVisibility(View.VISIBLE);
+            speechButton.setClickable(true);
+            progressBar.setVisibility(View.GONE);
+        }
+        else {
+            speechButton.setVisibility(View.GONE);
             speechButton.setClickable(false);
-//            progressBar.setVisibility(View.VISIBLE);
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-//                    progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
 
-                    speechButton.setClickable(true);
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-//                            personList.add(new Person("Nothing", Person.PersonType.TWO_ITEM));
-                            personList.add(new Person("@drawable/ghost", Person.PersonType.TWO_ITEM));
-                            recyclerView.setAdapter(new MyAdapter(personList));
-                            recyclerView.scrollToPosition(personList.size() - 1);
-                        }
-                    });
-                }
-            },5000);
+    private View.OnClickListener startSpeech = view -> {
+        new collectSpeech().execute();
+        resetButtons(false);
+        Vibrator vibrate = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrate.vibrate(VibrationEffect.createOneShot(250, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrate.vibrate(250);
         }
     };
 
+    @SuppressLint("StaticFieldLeak")
+    public class collectSpeech extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Speech speech = new Speech();
+            String captureSpeech = speech.startSpeech();
+            messageList.add(new Message(captureSpeech, Message.MessageType.ONE_ITEM));
+            runOnUiThread(MainActivity.this::updateAdapter);
+            return captureSpeech;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(result.matches(".*\\d+.*") && (result.contains("Timetable") || result.contains("timetable"))) {
+                Log.d("timetable", "THIS IS: " + result);
+                idNumber = result.replaceAll("[a-zA-Z]","").replaceAll("[^\\d]","");
+                Toast.makeText(getApplicationContext(), idNumber, Toast.LENGTH_LONG).show();
+                Log.d("timetable", "THIS IS new result: " + idNumber);
+                getTimeTable timeTable = new getTimeTable();
+                timeTable.execute();
+            }
+            else {
+                try {
+                    qnABot = new QnABot();
+                    qnABot.setQuestion(result);
+                    String reply = qnABot.execute().get();
+                    newMessage(qnABot.execute().get());
+                    synthesizer.SpeakToAudio(reply);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                resetButtons(true);
+            }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class getTimeTable extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection urlConnection = null;
+            StringBuilder result = new StringBuilder();
+            try {
+                URL url = new URL("http://35.189.65.75/id-timetable-v2.php/id/"+idNumber);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                int code = urlConnection.getResponseCode();
+
+                if(code==200){
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+                    String line;
+
+                    while ((line = bufferedReader.readLine()) != null)
+                        result.append(line);
+                    in.close();
+                }
+                return result.toString();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+            return result.toString();
+
+        }
+
+        @Override
+        protected void onPostExecute(String timetable) {
+            String[] x = timetable.split("\\{");
+            List<String[]> newTimetable = new ArrayList<>();
+            for (String aX : x) {
+                newTimetable.add(aX.split(","));
+            }
+
+            ArrayList<String[]> dayTimetable = new ArrayList<>();
+            ArrayList<ArrayList<String[]>> organizedTimetable = new ArrayList<>();
+            for(int i = 0; i< newTimetable.size();i++) {
+                if(Arrays.toString(newTimetable.get(i)).contains("day\":1")) {
+                    dayTimetable.add(newTimetable.get(i));
+                }
+                else if(Arrays.toString(newTimetable.get(i)).contains("day\":2")) {
+                    dayTimetable.add(newTimetable.get(i));
+                }
+                else if(Arrays.toString(newTimetable.get(i)).contains("day\":3")) {
+                    dayTimetable.add(newTimetable.get(i));
+                }
+                else if(Arrays.toString(newTimetable.get(i)).contains("day\":4")) {
+                    dayTimetable.add(newTimetable.get(i));
+                }
+                else if(Arrays.toString(newTimetable.get(i)).contains("day\":5")) {
+                    dayTimetable.add(newTimetable.get(i));
+                }
+                organizedTimetable.add(dayTimetable);
+            }
+
+            for(int i = 0; i < organizedTimetable.size(); i++)
+                for(int j= 0; j < organizedTimetable.get(i).size(); j++ )
+                    for(int k = 0 ; k < organizedTimetable.get(i).get(j).length; k++)
+                        organizedTimetable.get(i).get(j)[k] = organizedTimetable.get(i).get(j)[k].replaceAll("\"", "");
+
+
+            for(int j= 0; j < organizedTimetable.get(0).size(); j++ ) {
+                newMessage(organizedTimetable.get(0).get(j)[3].replaceAll(".*?:", "") +"\n"
+                        + organizedTimetable.get(0).get(j)[2].replaceAll(".*?:", "") +"\n"
+                        + organizedTimetable.get(0).get(j)[1].substring(0,1).toUpperCase() + organizedTimetable.get(0).get(j)[1].substring(1)+ "\n"
+                        + "Room: "+ organizedTimetable.get(0).get(j)[4].replaceAll(".*?:", ""));
+            }
+
+            resetButtons(true);
+        }
+    }
 }

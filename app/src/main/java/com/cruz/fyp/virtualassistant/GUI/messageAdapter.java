@@ -1,17 +1,19 @@
-package com.cruz.fyp.virtualassistant;
+package com.cruz.fyp.virtualassistant.GUI;
 
 import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.cruz.fyp.virtualassistant.Message;
+import com.cruz.fyp.virtualassistant.R;
+
 import java.util.List;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PersonViewHolder>{
+public class messageAdapter extends RecyclerView.Adapter<messageAdapter.PersonViewHolder>{
     private static final int TYPE_ONE = 1;
     private static final int TYPE_TWO = 2;
 
@@ -27,17 +29,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PersonViewHolder>{
         }
     }
 
-    private List<Person> persons;
+    private List<Message> messages;
 
-    MyAdapter(List<Person> persons){
-        this.persons = persons;
+    public messageAdapter(List<Message> messages){
+        this.messages = messages;
     }
     @Override
     public int getItemViewType(int position) {
-        Person person = persons.get(position);
-        if (person.getType() == Person.PersonType.ONE_ITEM) {
+        Message message = messages.get(position);
+        if (message.getType() == Message.MessageType.ONE_ITEM) {
             return TYPE_ONE;
-        } else if (person.getType() == Person.PersonType.TWO_ITEM) {
+        } else if (message.getType() == Message.MessageType.TWO_ITEM) {
             return TYPE_TWO;
         } else {
             return -1;
@@ -62,19 +64,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PersonViewHolder>{
             return new PersonViewHolder(v);
         }
         else {
-            throw new RuntimeException("The type has to be ONE or TWO");
+            throw new RuntimeException("The type has to be sent or received");
         }
     }
 
     @Override
-    public void onBindViewHolder(PersonViewHolder personViewHolder, int i) {
-//        personViewHolder.personName.setText(persons.get(i).name);
+    public void onBindViewHolder(@NonNull PersonViewHolder personViewHolder, int i) {
         switch (personViewHolder.getItemViewType()) {
             case TYPE_ONE:
-                initLayoutOne((PersonViewHolder)personViewHolder, i);
+                initLayoutOne(personViewHolder, i);
                 break;
             case TYPE_TWO:
-                initLayoutTwo((PersonViewHolder) personViewHolder, i);
+                initLayoutTwo(personViewHolder, i);
                 break;
             default:
                 break;
@@ -83,16 +84,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PersonViewHolder>{
 
 
     private void initLayoutOne(PersonViewHolder holder, int pos) {
-        holder.personName.setText(persons.get(pos).getName());
+        holder.personName.setText(messages.get(pos).getMsg());
     }
 
     private void initLayoutTwo(PersonViewHolder holder, int pos) {
-        holder.personName.setText(persons.get(pos).getName());
+        holder.personName.setText(messages.get(pos).getMsg());
     }
 
     @Override
     public int getItemCount() {
-        return persons.size();
+        return messages.size();
     }
 
 

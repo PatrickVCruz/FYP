@@ -19,14 +19,14 @@ public class SessionManager {
 
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
 
-    SessionManager(Context context) {
+    public SessionManager(Context context) {
         // Shared pref mode
         int PRIVATE_MODE = 0;
         pref = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
     }
 
-    void setLogin() {
+    public void setLogin() {
         editor.putBoolean(KEY_IS_LOGGEDIN, true);
 
         // commit changes
