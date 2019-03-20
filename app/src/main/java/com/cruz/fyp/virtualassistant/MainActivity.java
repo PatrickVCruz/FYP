@@ -14,9 +14,12 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cruz.fyp.virtualassistant.Azure.QnABot;
+import com.cruz.fyp.virtualassistant.Database.Database;
 import com.cruz.fyp.virtualassistant.GUI.messageAdapter;
 import com.cruz.fyp.virtualassistant.GUI.RecyclerTouchListener;
 import com.cruz.fyp.virtualassistant.Azure.Speech;
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private List<Message> messageList;
     private RecyclerView recyclerView;
     private Button speechButton;
+    private Button miniSpeechButton;
+    private Button keyboardButton;
+    private EditText textForm;
     private ProgressBar progressBar;
     private String idNumber;
     private QnABot qnABot;
@@ -54,8 +60,11 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.rv);
         speechButton = findViewById(R.id.SpeechButton);
+        miniSpeechButton = findViewById(R.id.SpeechButton2);
+        keyboardButton = findViewById(R.id.KeyboardButton);
         progressBar = findViewById(R.id.progressBar);
-        qnABot = new QnABot();
+        textForm = findViewById(R.id.TextForm);
+
         synthesizer = new Synthesizer(getString(R.string.api_key));
         synthesizer.SetServiceStrategy(Synthesizer.ServiceStrategy.AlwaysService);
         Voice voice = new Voice("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)", Voice.Gender.Male, true);
@@ -71,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         initializeData();
         initializeAdapter();
 
+        keyboardButton.setOnClickListener(keyboardPressed);
+
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
@@ -80,9 +91,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLongClick(View view, int position) {
                 Message message = messageList.get(position);
-                messageList.remove(position);
-                Toast.makeText(getApplicationContext(), message.getMsg() + " is deleted!", Toast.LENGTH_SHORT).show();
-                initializeAdapter();
+//                messageList.remove(position);
+//                Toast.makeText(getApplicationContext(), message.getMsg() + " is deleted!", Toast.LENGTH_SHORT).show();
+//                initializeAdapter();
+
+                Vibrator vibrate = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibrate.vibrate(250);
+                synthesizer.SpeakToAudio(message.getMsg());
             }
         }));
     }
@@ -111,16 +126,30 @@ public class MainActivity extends AppCompatActivity {
             speechButton.setVisibility(View.VISIBLE);
             speechButton.setClickable(true);
             progressBar.setVisibility(View.GONE);
+            keyboardButton.setVisibility(View.VISIBLE);
         }
         else {
             speechButton.setVisibility(View.GONE);
             speechButton.setClickable(false);
             progressBar.setVisibility(View.VISIBLE);
+            keyboardButton.setVisibility(View.GONE);
         }
     }
 
+    private View.OnClickListener keyboardPressed = view -> {
+        speechButton.setVisibility(View.GONE);
+        speechButton.setClickable(false);
+//        progressBar.setVisibility(View.VISIBLE);
+        keyboardButton.setVisibility(View.GONE);
+        textForm.setVisibility(View.VISIBLE);
+        miniSpeechButton.setVisibility(View.VISIBLE);
+    };
+
     private View.OnClickListener startSpeech = view -> {
         new collectSpeech().execute();
+//        String teser = db.checkCode("asd");
+//
+//        newMessage(teser);
         resetButtons(false);
         Vibrator vibrate = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -152,18 +181,49 @@ public class MainActivity extends AppCompatActivity {
                 getTimeTable timeTable = new getTimeTable();
                 timeTable.execute();
             }
+            else if(result.contains("Where is") || result.contains("Where'S")) {
+                String message = "";
+                if(result.contains("Where is"))
+                    message= result.replace("Where is","");
+                else if(result.contains("Where'S"))
+                    message = result.replace("Where'S","");
+                message = message.replace(" ","").replaceAll("[^A-Za-z0-9]", "");
+//                newMessage(y);
+                try {
+                    String z = new Think(message).execute().get();
+                    String[] roomDetails = z.split(",");
+                    StringBuilder details= new StringBuilder();
+                    details.append(roomDetails[0]).append(" ").append(roomDetails[1]);
+                    if(!String.valueOf(details).contains("Building")) {
+                        if(String.valueOf(details).contains("Business"))
+                            details.append(" School Building");
+                        else
+                            details.append(" Building");
+                    }
+                    newMessage(String.valueOf(details));
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             else {
                 try {
                     qnABot = new QnABot();
                     qnABot.setQuestion(result);
                     String reply = qnABot.execute().get();
-                    newMessage(qnABot.execute().get());
+                    newMessage(reply);
                     synthesizer.SpeakToAudio(reply);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
-                resetButtons(true);
             }
+            resetButtons(true);
+//            Think think = new Think(result);
+//            try {
+//                String x = think.execute().get();
+//                newMessage(x);
+//            } catch (ExecutionException | InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

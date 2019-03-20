@@ -1,4 +1,4 @@
-package com.cruz.fyp.virtualassistant;
+package com.cruz.fyp.virtualassistant.Azure;
 
 import android.os.AsyncTask;
 
@@ -29,12 +29,12 @@ public class QnABot extends AsyncTask<String, Void, String> {
     private String askedQuestion;
     private String question;
 
-    void setQuestion(String askedQuestion) {
+    public void setQuestion(String askedQuestion) {
         this.askedQuestion = askedQuestion;
         this.question = "{ 'question' : '"+ askedQuestion +"', 'top' : 1 }";
     }
 
-    QnABot() {
+    public QnABot() {
         this.question = "{ 'question' : '"+ askedQuestion +"', 'top' : 1 }";
     }
 
@@ -54,7 +54,7 @@ public class QnABot extends AsyncTask<String, Void, String> {
 
 
     @Override
-    protected String doInBackground(String... strings) {
+    public String doInBackground(String... strings) {
         URL url = null;
         StringBuilder response = new StringBuilder ();
         try {
