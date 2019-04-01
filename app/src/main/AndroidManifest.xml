@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.cruz.fyp.virtualassistant">
+    package="com.cruz.fyp.virtual_assistant">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -19,7 +19,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:configChanges="orientation"
         android:screenOrientation="portrait">
-        <activity android:name=".Activities.MainActivity">
+        <activity android:name="com.cruz.fyp.virtual_assistant.activities.MainActivity">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
 

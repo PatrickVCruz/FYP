@@ -42,7 +42,7 @@ dependencies {
 sonarqube {
     properties {
         def libraries = project.android.sdkDirectory.getPath() + "/platforms/android-23/android.jar"/* + ", build/intermediates/exploded-aar*//**//*classes.jar"*/
-        property "sonar.projectKey", "foo:shared"
+        property "sonar.projectKey", "ULGuide"
         property "sonar.sources", "src/main/java"
         property "sonar.binaries", "build/intermediates/classes/debug"
         property "sonar.libraries", libraries
