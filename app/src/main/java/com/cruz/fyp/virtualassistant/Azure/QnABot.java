@@ -1,6 +1,7 @@
 package com.cruz.fyp.virtualassistant.Azure;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -46,8 +47,8 @@ public class QnABot extends AsyncTask<String, Void, String> {
         String result = gson.toJson(json);
 
         JSONObject obj = new JSONObject(result);
-        JSONArray geodata = obj.getJSONArray("answers");
-        JSONObject person = geodata.getJSONObject(0);
+        JSONArray gdata = obj.getJSONArray("answers");
+        JSONObject person = gdata.getJSONObject(0);
 
         return gson.toJson(person.getString("answer"));
     }
@@ -90,22 +91,27 @@ public class QnABot extends AsyncTask<String, Void, String> {
             wr.flush();
             wr.close();
 
-
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 
             String line;
             while ((line = in.readLine()) != null) {
                 response.append(line);
             }
+            Log.d("unexpected ", response.toString());
             in.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            return PrettyPrint(response.toString());
+            String result = PrettyPrint(response.toString());
+            if(result.matches("\"No good match found in KB.\"")){
+                return "I'm sorry, could you repeat that";
+            }
+            else
+                return result;
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return "I'm sorry, I didn't get that could repeat it";
+        return "I'm sorry, could you repeat that";
     }
 }

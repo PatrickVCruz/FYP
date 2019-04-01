@@ -31,17 +31,17 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+    public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent e) {
 
-        View child = rv.findChildViewUnder(e.getX(), e.getY());
+        View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
         if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
-            clickListener.onClick(child, rv.getChildAdapterPosition(child));
+            clickListener.onClick(child, recyclerView.getChildAdapterPosition(child));
         }
         return false;
     }
 
     @Override
-    public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+    public void onTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent e) {
     }
 
     @Override

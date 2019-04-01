@@ -1,32 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Virtual Assistant</string>
-
-    <string name="action_settings">Settings</string>
-    <string name="action_add_favourite">Add to Favourites</string>
-    <string name="action_play_next">Play Next</string>
-    <string name="backdrop_title">LOVE MUSIC</string>
-    <string name="backdrop_subtitle">This season top 20 albums</string>
-    <string name="delete">Delete</string>
-
-    <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
-    <string name="hint_name">Fullname</string>
-    <string name="btn_login">LOGIN</string>
-    <string name="btn_register">REGISTER</string>
-    <string name="btn_link_to_register">Not a member? Sign up now.</string>
-    <string name="btn_link_to_login">Already registred! Login Me.</string>
-    <string name="welcome">Welcome</string>
-    <string name="btn_logout">LOGOUT</string>
-    <string name="name">Fullname</string>
-
-    <string name="play_button_name">Play</string>
-    <string name="stop_button_name">Stop</string>
-
-    <string name="api_key">fd42e10a86964bb49121885b0c33c170</string>
-
-    <string name="tts_text">This is a demo of Microsoft Cognitive Services Text to Speech API.</string>
-    <string name="add_subscription_key_tip_title">Subscription Key is Needed</string>
-    <string name="add_subscription_key_tip">Please put your subscription key to source file \"app/res/values/strings.xml\" to enable Face API calls.</string>
-
+    <!-- Azure Speech API Key -->
+    <string name="api_key">c44bdcc80c534399867a85e8212b806f</string>
+    <!-- Azure QnA Maker Deployment Details -->
 
 </resources>
