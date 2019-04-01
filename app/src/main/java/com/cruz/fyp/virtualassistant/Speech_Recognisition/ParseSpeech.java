@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 public class ParseSpeech {
 
+    private static final String LOG_TAG = "ParseSpeech";
     private String speech;
     private Trie trie;
 
@@ -25,12 +26,13 @@ public class ParseSpeech {
 
     public Object analyseSpeech(){
 
-        Object Message = null;
+        Object message = null;
         if(speech.matches(".*\\d+.*") && (speech.contains("TIMETABLE"))) {
             try {
-                Message = collectTimetable();
+                message = collectTimetable();
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, String.valueOf(e));
+                Thread.currentThread().interrupt();
             }
         }
         else if(speech.contains("WHERE CAN I FIND") || speech.contains("WHERE'S") || speech.contains("WHERE IS")) {
@@ -43,10 +45,11 @@ public class ParseSpeech {
                 String reply = qnABot.execute().get();
                 return createMessage(reply);
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, String.valueOf(e));
+                Thread.currentThread().interrupt();
             }
         }
-        return Message;
+        return message;
     }
 
     private Message createMessage(String message) {
@@ -80,11 +83,11 @@ public class ParseSpeech {
         Collection<Emit> emits = trie.parseText(speech);
 
         for (String word : checkWords) {
-            Log.d("unexpected", "Word now: " + word);
+            Log.d(LOG_TAG, "Word now: " + word);
             if (Arrays.toString(emits.toArray()).contains(word)) {
                 idNumber = speech.replaceAll("[a-zA-Z]", "").replaceAll("[^\\d]", "");
                 Timetable timetable = new Timetable(idNumber, word);
-                Log.d("unexpected", "Word found: " + word);
+                Log.d(LOG_TAG, "Word found: " + word);
 
                 return printSpecificTimetable(timetable.execute().get(), timetable.getDate());
             }
@@ -94,11 +97,11 @@ public class ParseSpeech {
     }
 
     private Message findTheRoom() {
-        String[] key_words = {"WHERE IS", "WHERE'S", "WHERE CAN I FIND", "WHERE IS THE", "WHERE'S THE", "WHERE CAN I FIND THE"};
-        trie = Trie.builder().onlyWholeWords().addKeywords(key_words).build();
+        String[] keyWords = {"WHERE IS", "WHERE'S", "WHERE CAN I FIND", "WHERE IS THE", "WHERE'S THE", "WHERE CAN I FIND THE"};
+        trie = Trie.builder().onlyWholeWords().addKeywords(keyWords).build();
         Collection<Emit> emits = trie.parseText(speech);
         String roomCode = null;
-        for(String word: key_words) {
+        for(String word: keyWords) {
             if(Arrays.toString(emits.toArray()).contains(word)) {
                 roomCode = speech.replaceAll(word,"");
             }
@@ -125,7 +128,8 @@ public class ParseSpeech {
                         " Building" + "\n" + roomDetails[2];
                 return createMessage(String.valueOf(details));
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, String.valueOf(e));
+                Thread.currentThread().interrupt();
             }
 
         return createMessage("I'm sorry I don't know where that is?");

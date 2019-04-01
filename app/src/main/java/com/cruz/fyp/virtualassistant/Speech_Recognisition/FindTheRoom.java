@@ -1,6 +1,7 @@
 package com.cruz.fyp.virtualassistant.Speech_Recognisition;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ public class FindTheRoom extends AsyncTask<String, Void, String>  {
             return result.toString();
         }
         catch (IOException e) {
-            e.printStackTrace();
+            Log.e("FindTheRoom",e.getMessage());
         }
 
         finally {

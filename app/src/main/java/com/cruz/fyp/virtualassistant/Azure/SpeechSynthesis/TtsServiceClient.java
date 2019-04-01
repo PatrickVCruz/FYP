@@ -24,7 +24,7 @@ class TtsServiceClient {
     private void doWork(String ssml) {
         int code;
         synchronized(m_auth) {
-            String accessToken = m_auth.GetAccessToken();
+            String accessToken = m_auth.getAccessToken();
             try {
                 URL url = new URL(m_serviceUri);
                 HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();

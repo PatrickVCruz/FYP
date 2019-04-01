@@ -2,6 +2,7 @@ package com.cruz.fyp.virtualassistant.Speech_Recognisition;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -83,19 +84,7 @@ public class Timetable extends AsyncTask<String,Void,ArrayList<ArrayList<String[
             ArrayList<String[]> dayTimetable = new ArrayList<>();
             ArrayList<ArrayList<String[]>> organizedTimetable = new ArrayList<>();
             for(int i = 0; i< newTimetable.size();i++) {
-                if(Arrays.toString(newTimetable.get(i)).contains("day\":1")) {
-                    dayTimetable.add(newTimetable.get(i));
-                }
-                else if(Arrays.toString(newTimetable.get(i)).contains("day\":2")) {
-                    dayTimetable.add(newTimetable.get(i));
-                }
-                else if(Arrays.toString(newTimetable.get(i)).contains("day\":3")) {
-                    dayTimetable.add(newTimetable.get(i));
-                }
-                else if(Arrays.toString(newTimetable.get(i)).contains("day\":4")) {
-                    dayTimetable.add(newTimetable.get(i));
-                }
-                else if(Arrays.toString(newTimetable.get(i)).contains("day\":5")) {
+                if(Arrays.toString(newTimetable.get(i)).contains("day\":")) {
                     dayTimetable.add(newTimetable.get(i));
                 }
                 organizedTimetable.add(dayTimetable);
@@ -109,13 +98,13 @@ public class Timetable extends AsyncTask<String,Void,ArrayList<ArrayList<String[
                     return organizedTimetable;
         }
         catch (IOException e) {
-            e.printStackTrace();
+            Log.e("Timetable", e.getMessage());
         }
 
         finally {
             assert urlConnection != null;
             urlConnection.disconnect();
         }
-            return null;
+            return new ArrayList<>();
     }
 }

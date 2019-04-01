@@ -12,7 +12,12 @@ import java.util.concurrent.Future;
 
 public class Speech {
 
-    public Speech() {}
+    private static final String LOG_TAG = "Speech";
+
+
+    public Speech() {
+        //Do nothing
+    }
 
     public String startSpeech() {
 
@@ -31,15 +36,15 @@ public class Speech {
             else {
                 speechRecognizer.close();
                 CancellationDetails cancellation = CancellationDetails.fromResult(result);
-                Log.d("Speech","unexpected " + result.getText() );
-                Log.d("Speech","unexpected " + cancellation.getErrorCode() );
-                Log.d("Speech","unexpected " + cancellation.getErrorDetails() );
-                Log.d("Speech","unexpected " + cancellation.getReason().getValue() );
+                Log.d(LOG_TAG, result.getText() );
+                Log.d(LOG_TAG, String.valueOf(cancellation.getErrorCode()));
+                Log.d(LOG_TAG, cancellation.getErrorDetails() );
+                Log.d(LOG_TAG, String.valueOf(cancellation.getReason().getValue()));
                 return result.toString();
             }
 
         } catch (Exception ex) {
-            Log.e("Speech", "unexpected " + ex.getMessage());
+            Log.e(LOG_TAG, "unexpected " + ex.getMessage());
         }
         return "I'm sorry, I didn't quite hear you could you repeat that?";
     }

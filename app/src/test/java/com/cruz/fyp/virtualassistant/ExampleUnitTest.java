@@ -156,7 +156,6 @@ public class ExampleUnitTest {
 
             //noinspection ConstantConditions
             date = daysOfWeek.get(today);
-
         }
 
         Timetable(String idNumber) {

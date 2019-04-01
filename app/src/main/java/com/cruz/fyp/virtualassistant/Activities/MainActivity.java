@@ -62,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(textEntered);
 
         synthesizer = new Synthesizer(getString(R.string.api_key));
-        synthesizer.SetServiceStrategy(Synthesizer.ServiceStrategy.AlwaysService);
-        Voice voice = new Voice("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)", Voice.Gender.Male);
-        synthesizer.SetVoice(voice);
+        synthesizer.setServiceStrategy(Synthesizer.ServiceStrategy.ALWAYS_SERVICE);
+        Voice voice = new Voice("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)", Voice.Gender.MALE);
+        synthesizer.setVoice(voice);
 
         speechButton.setOnClickListener(startSpeech);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         messageList.add(new Message("How can I help you today?", Message.MessageType.RECEIVED));
         initializeAdapter();
-        synthesizer.SpeakToAudio("How can I help you today?");
+        synthesizer.speakToAudio("How can I help you today?");
 
         keyboardButton.setOnClickListener(keyboardPressed);
         miniMicrophone.setOnClickListener(showMicrophone);
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     vibrate = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     vibrate.vibrate(250);
-                    synthesizer.SpeakToAudio(message.getMsg());
+                    synthesizer.speakToAudio(message.getMsg());
                 }
             }
         }));
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private View.OnClickListener startSpeech = view -> {
-        new collectSpeech().execute();
+        new CollectSpeech().execute();
         resetButtons(false);
         vibrate = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             Object obj = questionAsked.analyseSpeech();
               if(obj instanceof Message) {
                   messageList.add((Message) obj);
-                  synthesizer.SpeakToAudio(((Message) obj).getMsg());
+                  synthesizer.speakToAudio(((Message) obj).getMsg());
                 }
             else if(obj instanceof ArrayList) {
               if(((ArrayList) obj).get(0) instanceof String){
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     @SuppressLint("StaticFieldLeak")
-    public class collectSpeech extends AsyncTask<String, Void, String> {
+    public class CollectSpeech extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... strings) {
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             Object obj = questionAsked.analyseSpeech();
             if(obj instanceof Message) {
                 messageList.add((Message) obj);
-                synthesizer.SpeakToAudio(((Message) obj).getMsg());
+                synthesizer.speakToAudio(((Message) obj).getMsg());
             }
             else if(obj instanceof ArrayList) {
                 if(((ArrayList) obj).get(0) instanceof String){

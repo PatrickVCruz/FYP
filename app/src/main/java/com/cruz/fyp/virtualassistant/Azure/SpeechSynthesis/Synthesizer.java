@@ -3,12 +3,16 @@ package com.cruz.fyp.virtualassistant.Azure.SpeechSynthesis;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class Synthesizer {
 
-    private Voice m_serviceVoice;
+    private Voice mServiceVoice;
     private AudioTrack audioTrack;
     private Boolean isTalking;
+
+    private TtsServiceClient mTtsServiceClient;
+    private ServiceStrategy mEServiceStrategy;
 
     private void playSound(final byte[] sound) {
         if (sound == null || sound.length == 0){
@@ -37,64 +41,61 @@ public class Synthesizer {
                     audioTrack.flush();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("Synthesizer", e.getMessage());
             }
             isTalking = false;
         }
     }
-
     public enum ServiceStrategy {
-        AlwaysService
+        ALWAYS_SERVICE
+
     }
 
     public Synthesizer(String apiKey) {
-        m_serviceVoice = new Voice("en-US");
-        m_eServiceStrategy = ServiceStrategy.AlwaysService;
-        m_ttsServiceClient = new TtsServiceClient(apiKey);
+        mServiceVoice = new Voice("en-US");
+        mEServiceStrategy = ServiceStrategy.ALWAYS_SERVICE;
+        mTtsServiceClient = new TtsServiceClient(apiKey);
         isTalking = false;
     }
 
-    public void SetVoice(Voice serviceVoice) {
-        m_serviceVoice = serviceVoice;
+    public void setVoice(Voice serviceVoice) {
+        mServiceVoice = serviceVoice;
     }
 
-    public void SetServiceStrategy(ServiceStrategy eServiceStrategy) {
-        m_eServiceStrategy = eServiceStrategy;
+    public void setServiceStrategy(ServiceStrategy eServiceStrategy) {
+        mEServiceStrategy = eServiceStrategy;
     }
 
-    private byte[] Speak(String text) {
-        String ssml = "<speak version='1.0' xml:lang='" + m_serviceVoice.lang + "'><voice xml:lang='" + m_serviceVoice.lang + "' xml:gender='" + m_serviceVoice.gender + "'";
-        if (m_eServiceStrategy == ServiceStrategy.AlwaysService) {
-            if (m_serviceVoice.voiceName.length() > 0) {
-                ssml += " name='" + m_serviceVoice.voiceName + "'>";
+    private byte[] speak(String text) {
+        String ssml = "<speak version='1.0' xml:lang='" + mServiceVoice.lang + "'><voice xml:lang='" + mServiceVoice.lang + "' xml:gender='" + mServiceVoice.gender + "'";
+        if (mEServiceStrategy == ServiceStrategy.ALWAYS_SERVICE) {
+            if (mServiceVoice.voiceName.length() > 0) {
+                ssml += " name='" + mServiceVoice.voiceName + "'>";
             } else {
                 ssml += ">";
             }
             ssml +=  text + "</voice></speak>";
         }
-        return SpeakSSML(ssml);
+        return speakSSML(ssml);
     }
 
     public Boolean getTalking() {
         return isTalking;
     }
 
-    public void SpeakToAudio(String text) {
+    public void speakToAudio(String text) {
         isTalking = true;
-        playSound(Speak(text));
+        playSound(speak(text));
     }
 
-    private byte[] SpeakSSML(String ssml) {
+    private byte[] speakSSML(String ssml) {
         byte[] result = null;
-        if (m_eServiceStrategy == ServiceStrategy.AlwaysService) {
-            result = m_ttsServiceClient.SpeakSSML(ssml);
+        if (mEServiceStrategy == ServiceStrategy.ALWAYS_SERVICE) {
+            result = mTtsServiceClient.SpeakSSML(ssml);
             if (result == null || result.length == 0) {
-                return null;
+                return new byte[0];
             }
         }
         return result;
     }
-
-    private TtsServiceClient m_ttsServiceClient;
-    private ServiceStrategy m_eServiceStrategy;
 }

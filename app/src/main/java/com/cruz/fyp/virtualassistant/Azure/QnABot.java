@@ -25,6 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class QnABot extends AsyncTask<String, Void, String> {
 
+    private static final String LOG_TAG = "QnABot";
     private String kb = "80fdef9b-f16a-49fc-b1bf-ac9204ad25f3";
     private String method = "/qnamaker/knowledgebases/" + kb + "/generateAnswer";
     private String askedQuestion;
@@ -40,9 +41,9 @@ public class QnABot extends AsyncTask<String, Void, String> {
     }
 
 
-    private String PrettyPrint(String json_text) throws JSONException {
+    private String prettyPrint(String jsonText) throws JSONException {
         JsonParser parser = new JsonParser();
-        JsonElement json = parser.parse(json_text);
+        JsonElement json = parser.parse(jsonText);
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         String result = gson.toJson(json);
 
@@ -62,32 +63,32 @@ public class QnABot extends AsyncTask<String, Void, String> {
             String host = "https://fyp-faq.azurewebsites.net";
             url = new URL(host + method);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
         HttpsURLConnection connection = null;
         try {
             assert url != null;
             connection = (HttpsURLConnection) url.openConnection();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
         try {
             assert connection != null;
             connection.setRequestMethod("POST");
         } catch (ProtocolException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("Content-Length", question.length() + "");
-        String endpoint_key = "11e1a057-6d48-453d-b3bc-1591e956016a";
-        connection.setRequestProperty("Authorization", "EndpointKey " + endpoint_key);
+        String endpointKey = "11e1a057-6d48-453d-b3bc-1591e956016a";
+        connection.setRequestProperty("Authorization", "EndpointKey " + endpointKey);
         connection.setDoOutput(true);
 
         DataOutputStream wr;
         try {
             wr = new DataOutputStream(connection.getOutputStream());
-            byte[] encoded_content = question.getBytes(StandardCharsets.UTF_8);
-            wr.write(encoded_content, 0, encoded_content.length);
+            byte[] encodedContent = question.getBytes(StandardCharsets.UTF_8);
+            wr.write(encodedContent, 0, encodedContent.length);
             wr.flush();
             wr.close();
 
@@ -100,17 +101,17 @@ public class QnABot extends AsyncTask<String, Void, String> {
             Log.d("unexpected ", response.toString());
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
         try {
-            String result = PrettyPrint(response.toString());
+            String result = prettyPrint(response.toString());
             if(result.matches("\"No good match found in KB.\"")){
                 return "I'm sorry, could you repeat that";
             }
             else
                 return result;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
         return "I'm sorry, could you repeat that";
     }

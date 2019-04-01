@@ -14,26 +14,26 @@ import javax.net.ssl.HttpsURLConnection;
 
 class Authentication {
     private static final String LOG_TAG = "Authentication";
-    private static final String AccessTokenUri = "https://westeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
+    private static final String ACCESS_TOKEN_URI = "https://westeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
 
     private String apiKey;
     private String accessToken;
 
     Authentication(String apiKey) {
         this.apiKey = apiKey;
-        Thread thread = new Thread(this::RenewAccessToken);
+        Thread thread = new Thread(this::renewAccessToken);
 
         try {
             thread.start();
             thread.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, e.getMessage());
         }
 
         Timer accessTokenCheck = new Timer();
         TimerTask nineMinutesTask = new TimerTask() {
             public void run() {
-                RenewAccessToken();
+                renewAccessToken();
             }
         };
 
@@ -41,12 +41,12 @@ class Authentication {
         accessTokenCheck.schedule(nineMinutesTask, refreshTokenDuration, refreshTokenDuration);
     }
 
-    String GetAccessToken() {
+    String getAccessToken() {
         return this.accessToken;
     }
-    private void RenewAccessToken() {
+    private void renewAccessToken() {
         synchronized(this) {
-            HttpPost(this.apiKey);
+            httpPost(this.apiKey);
 
             if(this.accessToken != null){
                 Log.d(LOG_TAG, "new Access Token: " + this.accessToken);
@@ -54,12 +54,12 @@ class Authentication {
         }
     }
 
-    private void HttpPost(String apiKey) {
+    private void httpPost(String apiKey) {
         InputStream inputStream;
         HttpsURLConnection webRequest;
         this.accessToken = null;
         try{
-            URL url = new URL(Authentication.AccessTokenUri);
+            URL url = new URL(Authentication.ACCESS_TOKEN_URI);
             webRequest = (HttpsURLConnection) url.openConnection();
             webRequest.setDoInput(true);
             webRequest.setDoOutput(true);

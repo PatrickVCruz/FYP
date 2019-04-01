@@ -7,13 +7,13 @@ public class Voice {
     final Gender gender;
 
     public enum Gender {
-        Male, Female
+        MALE, FEMALE
     }
 
     Voice(String lang) {
         this.lang = lang;
         this.voiceName = "";
-        this.gender = Gender.Female;
+        this.gender = Gender.FEMALE;
     }
 
     public Voice(String lang, String voiceName, Gender gender) {

@@ -46,10 +46,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.PersonVi
     }
 
 
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-    }
 
     @NonNull
     @Override
