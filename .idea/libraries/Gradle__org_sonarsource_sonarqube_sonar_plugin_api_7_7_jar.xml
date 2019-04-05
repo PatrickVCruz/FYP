@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.sonarsource.sonarqube:sonar-plugin-api:7.7@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.sonarsource.sonarqube/sonar-plugin-api/7.7/6a3e0eee133bdd8a122d3282b4738a1b9cdede1d/sonar-plugin-api-7.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.sonarsource.sonarqube/sonar-plugin-api/7.7/9d25826062df5effc69b3475d2b1a6db3c48dcbb/sonar-plugin-api-7.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

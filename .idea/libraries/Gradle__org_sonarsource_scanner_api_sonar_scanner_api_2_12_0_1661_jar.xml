@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.sonarsource.scanner.api:sonar-scanner-api:2.12.0.1661@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.sonarsource.scanner.api/sonar-scanner-api/2.12.0.1661/f902d6bfeea09a00d7a9a78df73d9cc7bfb29bf4/sonar-scanner-api-2.12.0.1661.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.sonarsource.scanner.api/sonar-scanner-api/2.12.0.1661/b3da17e95a1103a1eea745ab2f41412fbeaea1c6/sonar-scanner-api-2.12.0.1661-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
