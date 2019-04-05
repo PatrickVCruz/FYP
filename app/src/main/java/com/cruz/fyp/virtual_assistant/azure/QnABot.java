@@ -26,7 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class QnABot extends AsyncTask<String, Void, String> {
 
     private static final String LOG_TAG = "QnABot";
-    private String kb = "80fdef9b-f16a-49fc-b1bf-ac9204ad25f3";
+    private String kb = "sub_key";
     private String method = "/qnamaker/knowledgebases/" + kb + "/generateAnswer";
     private String askedQuestion;
     private String question;

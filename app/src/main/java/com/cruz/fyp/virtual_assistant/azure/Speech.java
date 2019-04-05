@@ -22,7 +22,7 @@ public class Speech {
     public String startSpeech() {
 
         try {
-            String speechSubscriptionKey = "c44bdcc80c534399867a85e8212b806f";
+            String speechSubscriptionKey = "sub_key";
             String serviceRegion = "westeurope";
             SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
             SpeechRecognizer speechRecognizer = new SpeechRecognizer(config);

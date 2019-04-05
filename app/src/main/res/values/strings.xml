@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Virtual Assistant</string>
     <!-- Azure Speech API Key -->
-    <string name="api_key">c44bdcc80c534399867a85e8212b806f</string>
+    <string name="api_key"></string>
     <!-- Azure QnA Maker Deployment Details -->
 
 </resources>
